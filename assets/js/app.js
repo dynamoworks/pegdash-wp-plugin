@@ -51,12 +51,16 @@ async function fetchAjax(actionName, entity, payload = null, id = null) {
 async function loadAllData() {
     console.log("Sincronizando con Base de Datos SQL via admin-ajax...");
     
+    if(window.Swal) Swal.fire({ title: 'Cargando Estadísticas...', text: 'Descargando datos', allowOutsideClick: false, background: '#111', color: '#fff', didOpen: () => Swal.showLoading() });
+
     // Obtenemos los arrays prometidos del backend
     const [c, as, ads, m, al, sl, cla, tt] = await Promise.all([
         fetchAjax('pegdash_get_data', 'campaigns'), fetchAjax('pegdash_get_data', 'adsets'), fetchAjax('pegdash_get_data', 'ads'),
         fetchAjax('pegdash_get_data', 'media'), fetchAjax('pegdash_get_data', 'ad_logs'), fetchAjax('pegdash_get_data', 'sales_logs'),
         fetchAjax('pegdash_get_data', 'classifications'), fetchAjax('pegdash_get_data', 'ticket_types')
     ]);
+    
+    if(window.Swal) Swal.close();
     
     data.campaigns = c || []; 
     data.adsets = as || []; 
@@ -76,7 +80,12 @@ async function loadAllData() {
 }
 
 async function addDocSQL(entity, payload) {
+    if(window.Swal) Swal.fire({ title: 'Guardando...', allowOutsideClick: false, background: '#111', color: '#ff5100', didOpen: () => Swal.showLoading() });
+    
     const newDoc = await fetchAjax('pegdash_save_data', entity, payload);
+    
+    if(window.Swal) Swal.close();
+
     if(newDoc && newDoc.id) {
         data[entity].push(newDoc);
         render();
@@ -87,10 +96,14 @@ async function addDocSQL(entity, payload) {
 
 window.deleteDocById = async (entity, id) => { 
     if(confirm("¿Seguro de eliminar permanentemente?")) {
+        if(window.Swal) Swal.fire({ title: 'Eliminando...', allowOutsideClick: false, background: '#111', color: '#ff5100', didOpen: () => Swal.showLoading() });
         const res = await fetchAjax('pegdash_delete_data', entity, null, id);
+        if(window.Swal) Swal.close();
+
         if (res && res.deleted) {
             data[entity] = data[entity].filter(d => d.id !== String(id));
             render();
+            window.showToast("Dato eliminado permanentemente");
         } else {
             console.error('No se pudo borrar desde la base de datos local');
         }
@@ -340,12 +353,26 @@ window.openAdModal = (adsetId) => { document.getElementById('ad-adset-id').value
 window.openMediaModal = (adId) => { document.getElementById('media-ad-id').value = adId; openModal('modal-media'); };
 
 window.showToast = function(msg) {
-    const t = document.getElementById('toast');
-    const m = document.getElementById('toast-msg');
-    if(t && m) { 
-        m.innerText = msg; 
-        t.classList.remove('translate-x-72'); 
-        setTimeout(() => t.classList.add('translate-x-72'), 3000); 
+    if (window.Swal) {
+        Swal.fire({
+            toast: true,
+            position: 'bottom-end',
+            icon: 'success',
+            title: msg,
+            showConfirmButton: false,
+            timer: 3000,
+            background: '#111111',
+            color: '#ffffff',
+            iconColor: '#ff5100'
+        });
+    } else {
+        const t = document.getElementById('toast');
+        const m = document.getElementById('toast-msg');
+        if(t && m) { 
+            m.innerText = msg; 
+            t.classList.remove('translate-x-72'); 
+            setTimeout(() => t.classList.add('translate-x-72'), 3000); 
+        }
     }
 }
 

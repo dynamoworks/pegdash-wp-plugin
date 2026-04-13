@@ -136,6 +136,7 @@ class PegDash_Plugin {
             wp_enqueue_script('tailwindcss', 'https://cdn.tailwindcss.com', array(), null, false);
             wp_enqueue_script('chartjs', 'https://cdn.jsdelivr.net/npm/chart.js', array(), null, false);
             wp_enqueue_script('lucide', 'https://unpkg.com/lucide@latest', array(), null, false);
+            wp_enqueue_script('sweetalert2', 'https://cdn.jsdelivr.net/npm/sweetalert2@11', array(), null, false);
 
             wp_enqueue_style('pegdash-style', PEGDASH_PLUGIN_URL . '/assets/css/style.css', array(), time());
             
