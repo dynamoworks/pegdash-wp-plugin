@@ -358,7 +358,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const attachSubmit = (id, fn) => { const el = document.getElementById(id); if(el) el.addEventListener('submit', fn); };
 
-    document.getElementById('form-campaign').addEventListener('submit', async (e) => {
+    attachSubmit('form-campaign', async (e) => {
         e.preventDefault();
         const payload = { name: document.getElementById('camp-name').value, goal: document.getElementById('camp-goal').value };
         const docRes = await addDocSQL('campaigns', payload);
