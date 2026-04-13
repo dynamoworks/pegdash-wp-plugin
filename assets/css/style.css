@@ -1,0 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+.pegdash-wrapper {
+    min-height: 100vh; 
+    font-family: 'Plus Jakarta Sans', sans-serif; 
+    background-color: #000000;
+    color: #ffffff;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.tab-active { 
+    @apply bg-[#ff5100] text-white shadow-lg shadow-[#ff5100]/20; 
+}
+
+.nav-btn { 
+    @apply px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2; 
+}
+
+.card-kpi { 
+    @apply bg-[#111111] p-6 rounded-[2rem] border border-[#222222] shadow-sm transition-all hover:border-[#444444]; 
+}
+
+.progress-bar { 
+    @apply h-3 rounded-full bg-[#222222] overflow-hidden; 
+}
+
+.progress-fill { 
+    @apply h-full bg-[#ff5100] transition-all duration-1000 ease-out; 
+}
+
+.nested-card { 
+    @apply border-l-4 border-[#ff5100] bg-[#1a1a1a] p-4 rounded-r-2xl mb-4; 
+}
+
+.form-card { 
+    @apply bg-[#111111] p-8 rounded-[2.5rem] shadow-xl border border-[#222222]; 
+}
+
+/* Custom Scrollbar for Dark Theme */
+::-webkit-scrollbar { 
+    width: 8px; 
+}
+
+::-webkit-scrollbar-track { 
+    background: #000000; 
+}
+
+::-webkit-scrollbar-thumb { 
+    background: #333333; 
+    border-radius: 4px; 
+}
+
+::-webkit-scrollbar-thumb:hover { 
+    background: #ff5100; 
+}
+
