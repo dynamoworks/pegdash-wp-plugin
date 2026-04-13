@@ -28,10 +28,15 @@ async function fetchAPI(endpoint, method = 'GET', payload = null) {
     try {
         const response = await fetch(`${restUrl}/${endpoint}`, options);
         if (!response.ok) {
-            const errorMsg = await response.text();
-            console.error("fetchAPI Error:", errorMsg);
-            alert("Error del servidor WP: " + response.status + " " + response.statusText);
-            throw new Error("Error en peticion al servidor");
+            const errorText = await response.text();
+            let parsedErr = errorText;
+            try { 
+                const j = JSON.parse(errorText); 
+                if(j.message) parsedErr = j.message; 
+            } catch(e) {}
+            
+            alert(`🛑 ALERTA WP: ${response.status}\n\nDetalle:\n${parsedErr}`);
+            throw new Error(parsedErr);
         }
         return await response.json();
     } catch (e) {
