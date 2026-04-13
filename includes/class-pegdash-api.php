@@ -105,10 +105,12 @@ class PegDash_API {
         if (isset($params['createdAt'])) {
             unset($params['createdAt']);
         }
+        
+        $params['created_at'] = current_time('mysql');
 
         $result = $wpdb->insert($table_name, $params);
         if ($result === false) {
-            return new WP_Error('db_insert_error', 'Error insertando en la Base de Datos', array('status' => 500));
+            return new WP_Error('db_insert_error', 'MySQL Error: ' . $wpdb->last_error . ' (Tabla Intentada: ' . $table_name . ')', array('status' => 500));
         }
 
         $insert_id = $wpdb->insert_id;
