@@ -5,7 +5,7 @@ const nonce = window.pegDashVars?.nonce || '';
 
 // --- Estado Global ---
 let data = { campaigns: [], adsets: [], ads: [], media: [], ad_logs: [], sales_logs: [], classifications: [], ticket_types: [] };
-let activeCampaignId = localStorage.getItem('active_campaign_id') || "";
+let activeCampaignId = "";
 let charts = {};
 let isReady = false;
 
@@ -136,7 +136,6 @@ function renderSelectors() {
 
 window.changeCampaign = (id) => {
     activeCampaignId = id;
-    localStorage.setItem('active_campaign_id', id);
     render();
 };
 
@@ -359,11 +358,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const attachSubmit = (id, fn) => { const el = document.getElementById(id); if(el) el.addEventListener('submit', fn); };
 
-    attachSubmit('form-campaign', async (e) => {
+    document.getElementById('form-campaign').addEventListener('submit', async (e) => {
         e.preventDefault();
         const payload = { name: document.getElementById('camp-name').value, goal: document.getElementById('camp-goal').value };
         const docRes = await addDocSQL('campaigns', payload);
-        if(docRes) { activeCampaignId = docRes.id; localStorage.setItem('active_campaign_id', activeCampaignId); }
+        if(docRes) { activeCampaignId = docRes.id; }
         e.target.reset(); window.showToast("Campaña creada SQL");
     });
 
