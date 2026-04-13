@@ -1,6 +1,6 @@
-// --- APP.JS (VERSIÓN REST API NATIVA DE WORDPRESS) ---
+// --- APP.JS (VERSIÓN AJAX PHP NATIVA DE WORDPRESS) ---
 
-const restUrl = window.pegDashVars?.restUrl || '';
+const ajaxUrl = window.pegDashVars?.ajaxUrl || '';
 const nonce = window.pegDashVars?.nonce || '';
 
 // --- Estado Global ---
@@ -11,48 +11,51 @@ let isReady = false;
 
 // Configurar el Identificador de Sistema
 const elAuth = document.getElementById('auth-status');
-if (elAuth) elAuth.innerText = `DB: SQL Local`;
+if (elAuth) elAuth.innerText = `DB: SQL Local (AJAX PHP)`;
 
-// --- Helpers de Servidor API SQL ---
+// --- Helpers de Servidor PHP AJAX ---
 
-async function fetchAPI(endpoint, method = 'GET', payload = null) {
-    const options = {
-        method: method,
-        headers: { 'X-WP-Nonce': nonce }
-    };
-    if (payload && method !== 'GET') {
-        options.headers['Content-Type'] = 'application/json';
-        options.body = JSON.stringify(payload);
-    }
-    
+async function fetchAjax(actionName, entity, payload = null, id = null) {
+    const formData = new URLSearchParams();
+    formData.append('action', actionName);
+    formData.append('security', nonce);
+    formData.append('entity', entity);
+    if(payload) formData.append('payload', JSON.stringify(payload));
+    if(id) formData.append('id', id);
+
     try {
-        const response = await fetch(`${restUrl}/${endpoint}`, options);
+        const response = await fetch(ajaxUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+            body: formData.toString()
+        });
+        
         if (!response.ok) {
-            const errorText = await response.text();
-            let parsedErr = errorText;
-            try { 
-                const j = JSON.parse(errorText); 
-                if(j.message) parsedErr = j.message; 
-            } catch(e) {}
-            
-            alert(`🛑 ALERTA WP: ${response.status}\n\nDetalle:\n${parsedErr}`);
-            throw new Error(parsedErr);
+            alert(`🚨 Fallo en la comunicación con admin-ajax.php: ${response.status}`);
+            return null;
         }
-        return await response.json();
-    } catch (e) {
-        console.error("Fetch API Catch:", e);
+
+        const json = await response.json();
+        if(json.success) {
+            return json.data;
+        } else {
+            alert(`⚠️ Error PHP AJAX en Tabla '${entity}':\n${json.data}`);
+            return null;
+        }
+    } catch(e) {
+        console.error("AJAX Catch Error:", e);
         return null;
     }
 }
 
 async function loadAllData() {
-    console.log("Sincronizando con Base de Datos SQL...");
+    console.log("Sincronizando con Base de Datos SQL via admin-ajax...");
     
     // Obtenemos los arrays prometidos del backend
     const [c, as, ads, m, al, sl, cla, tt] = await Promise.all([
-        fetchAPI('campaigns'), fetchAPI('adsets'), fetchAPI('ads'),
-        fetchAPI('media'), fetchAPI('ad_logs'), fetchAPI('sales_logs'),
-        fetchAPI('classifications'), fetchAPI('ticket_types')
+        fetchAjax('pegdash_get_data', 'campaigns'), fetchAjax('pegdash_get_data', 'adsets'), fetchAjax('pegdash_get_data', 'ads'),
+        fetchAjax('pegdash_get_data', 'media'), fetchAjax('pegdash_get_data', 'ad_logs'), fetchAjax('pegdash_get_data', 'sales_logs'),
+        fetchAjax('pegdash_get_data', 'classifications'), fetchAjax('pegdash_get_data', 'ticket_types')
     ]);
     
     data.campaigns = c || []; 
@@ -73,25 +76,23 @@ async function loadAllData() {
 }
 
 async function addDocSQL(entity, payload) {
-    const newDoc = await fetchAPI(entity, 'POST', payload);
+    const newDoc = await fetchAjax('pegdash_save_data', entity, payload);
     if(newDoc && newDoc.id) {
         data[entity].push(newDoc);
         render();
         return newDoc;
-    } else {
-        alert("Fallo crítico al guardar info en la BD (Tabla: " + entity + ").");
     }
     return null;
 }
 
 window.deleteDocById = async (entity, id) => { 
     if(confirm("¿Seguro de eliminar permanentemente?")) {
-        const res = await fetchAPI(`${entity}/${id}`, 'DELETE');
+        const res = await fetchAjax('pegdash_delete_data', entity, null, id);
         if (res && res.deleted) {
             data[entity] = data[entity].filter(d => d.id !== String(id));
             render();
         } else {
-            alert('Hubo un error al eliminar el registro en la BD');
+            console.error('No se pudo borrar desde la base de datos local');
         }
     }
 };

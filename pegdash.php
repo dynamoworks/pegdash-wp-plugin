@@ -14,9 +14,9 @@ if (!defined('ABSPATH')) {
 define('PEGDASH_PLUGIN_URL', untrailingslashit(plugin_dir_url(__FILE__)));
 define('PEGDASH_PLUGIN_DIR', untrailingslashit(plugin_dir_path(__FILE__)));
 
-// Incluimos las clases del backend SQL y la REST API
+// Incluimos las clases del backend SQL y la interfaz AJAX nativa
 require_once PEGDASH_PLUGIN_DIR . '/includes/class-pegdash-db.php';
-require_once PEGDASH_PLUGIN_DIR . '/includes/class-pegdash-api.php';
+require_once PEGDASH_PLUGIN_DIR . '/includes/class-pegdash-ajax.php';
 
 // Hook para crear las tablas automáticamente cuando se active el plugin
 register_activation_hook(__FILE__, array('PegDash_DB', 'create_tables'));
@@ -32,8 +32,8 @@ class PegDash_Plugin {
         add_shortcode('pegdash', array($this, 'render_shortcode'));
         add_filter('the_content', array($this, 'auto_render_dashboard'));
 
-        // Iniciamos la REST API Local
-        new PegDash_API();
+        // Iniciamos el receptor de AJAX PHP Nativo
+        new PegDash_Ajax();
     }
 
     public function add_admin_menu() {
@@ -61,7 +61,7 @@ class PegDash_Plugin {
         $all_roles = $wp_roles->roles;
         ?>
         <div class="wrap">
-            <h1>Configuración de Pensar BIG (Local DB)</h1>
+            <h1>Configuración de Pensar BIG (Local DB AJAX)</h1>
             <div style="background: #fff; padding: 20px; border: 1px solid #ccd0d4; border-left: 4px solid #ff5100; margin-top: 20px; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
                 <form method="post" action="options.php">
                     <?php
@@ -142,10 +142,10 @@ class PegDash_Plugin {
             // Enqueue main app script
             wp_enqueue_script('pegdash-app', PEGDASH_PLUGIN_URL . '/assets/js/app.js', array(), time(), true);
 
-            // IMPORTANTE: Pasamos las URLs de nuestra API REST y el Nonce (token de validacion de WP) al JS
+            // IMPORTANTE: Pasamos las URLs de nuestra AJAX y el Nonce (token de validacion de WP) al JS
             wp_localize_script('pegdash-app', 'pegDashVars', array(
-                'restUrl' => esc_url_raw(rest_url('pegdash/v1')),
-                'nonce'   => wp_create_nonce('wp_rest')
+                'ajaxUrl' => esc_url_raw(admin_url('admin-ajax.php')),
+                'nonce'   => wp_create_nonce('pegdash_nonce')
             ));
         }
     }
