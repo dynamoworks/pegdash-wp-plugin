@@ -121,10 +121,12 @@ function render() {
     if(window.lucide) window.lucide.createIcons();
 }
 
-function renderSelectors() {
     const campSel = document.getElementById('active-campaign-selector');
-    if(campSel) campSel.innerHTML = data.campaigns.map(c => `<option class="bg-[#111] text-white" value="${c.id}" ${c.id === activeCampaignId ? 'selected' : ''}>${c.name}</option>`).join('') || '<option value="" class="bg-[#111] text-white">Crea una campaña</option>';
+    const moSel = document.getElementById('mobile-active-campaign-selector');
+    const campHtml = data.campaigns.map(c => `<option class="bg-[#111] text-white" value="${c.id}" ${c.id === activeCampaignId ? 'selected' : ''}>${c.name}</option>`).join('') || '<option value="" class="bg-[#111] text-white">Crea una campaña</option>';
     
+    if(campSel) campSel.innerHTML = campHtml;
+    if(moSel) moSel.innerHTML = campHtml;
     const adsetCampSel = document.getElementById('adset-campaign');
     if(adsetCampSel) adsetCampSel.innerHTML = data.campaigns.map(c => `<option class="bg-[#111] text-white" value="${c.id}" ${c.id === activeCampaignId ? 'selected' : ''}>${c.name}</option>`).join('') || '<option value="" class="bg-[#111] text-white">Sin campañas</option>';
 
