@@ -140,10 +140,10 @@ class PegDash_Plugin {
             wp_enqueue_script('chartjs', 'https://cdn.jsdelivr.net/npm/chart.js', array(), null, false);
             wp_enqueue_script('lucide', 'https://unpkg.com/lucide@latest', array(), null, false);
 
-            wp_enqueue_style('pegdash-style', PEGDASH_PLUGIN_URL . '/assets/css/style.css', array(), '2.0.0');
+            wp_enqueue_style('pegdash-style', PEGDASH_PLUGIN_URL . '/assets/css/style.css', array(), time());
             
             // Enqueue main app script
-            wp_enqueue_script('pegdash-app', PEGDASH_PLUGIN_URL . '/assets/js/app.js', array(), '2.0.0', true);
+            wp_enqueue_script('pegdash-app', PEGDASH_PLUGIN_URL . '/assets/js/app.js', array(), time(), true);
 
             // IMPORTANTE: Pasamos las URLs de nuestra API REST y el Nonce (token de validacion de WP) al JS
             wp_localize_script('pegdash-app', 'pegDashVars', array(
