@@ -10,8 +10,13 @@ let charts = {};
 let isReady = false;
 
 // Configurar el Identificador de Sistema
-const elAuth = document.getElementById('auth-status');
-if (elAuth) elAuth.innerText = `DB: SQL Local (AJAX PHP)`;
+const startInitialTab = () => {
+    // Esconder todas y mostrar campaigns_hub por defecto inicial
+    document.querySelectorAll('.app-section').forEach(s => s.classList.add('hidden'));
+    const h = document.getElementById('section-campaigns_hub'); 
+    if(h) h.classList.remove('hidden');
+};
+startInitialTab();
 
 // --- Helpers de Servidor PHP AJAX ---
 
@@ -114,6 +119,7 @@ window.deleteDocById = async (entity, id) => {
 function render() {
     if (!isReady) return;
     renderSelectors();
+    renderCampaignsHub();
     renderStats();
     renderHierarchy();
     renderConfig();
@@ -122,11 +128,9 @@ function render() {
 
 function renderSelectors() {
     const campSel = document.getElementById('active-campaign-selector');
-    const moSel = document.getElementById('mobile-active-campaign-selector');
-    const campHtml = data.campaigns.map(c => `<option class="bg-[#111] text-white" value="${c.id}" ${c.id === activeCampaignId ? 'selected' : ''}>${c.name}</option>`).join('') || '<option value="" class="bg-[#111] text-white">Crea una campaña</option>';
+    const campHtml = data.campaigns.map(c => `<option class="bg-[#111] text-white font-bold" value="${c.id}" ${c.id === activeCampaignId ? 'selected' : ''}>${c.name}</option>`).join('') || '<option value="" class="bg-[#111] text-white">Crea una campaña</option>';
     
     if(campSel) campSel.innerHTML = campHtml;
-    if(moSel) moSel.innerHTML = campHtml;
     const adsetCampSel = document.getElementById('adset-campaign');
     if(adsetCampSel) adsetCampSel.innerHTML = data.campaigns.map(c => `<option class="bg-[#111] text-white" value="${c.id}" ${c.id === activeCampaignId ? 'selected' : ''}>${c.name}</option>`).join('') || '<option value="" class="bg-[#111] text-white">Sin campañas</option>';
 
@@ -153,6 +157,72 @@ window.changeCampaign = (id) => {
     activeCampaignId = id;
     render();
 };
+
+function renderCampaignsHub() {
+    const tbody = document.getElementById('campaigns-hub-body');
+    if(!tbody) return;
+    
+    if(data.campaigns.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="py-12 text-center text-[#a3a3a3]">No hay campañas registradas. Configura tu primera campaña.</td></tr>`;
+        return;
+    }
+
+    let html = '';
+    data.campaigns.forEach(c => {
+        // Encontrar AdSets que pertenezcan a esta campaña
+        const adsetIds = data.adsets.filter(a => String(a.campaignId) === String(c.id)).map(a => String(a.id));
+        const cLogs = data.ad_logs.filter(l => adsetIds.includes(String(l.adsetId)));
+        
+        const totalSpend = cLogs.reduce((sum, l) => sum + parseFloat(l.spend||0), 0);
+        const totalLeads = cLogs.reduce((sum, l) => sum + parseInt(l.leads||0), 0);
+
+        // Encontrar ventas directas o registradas para esta campaña
+        const sLogs = data.sales_logs.filter(s => String(s.campaignId) === String(c.id));
+        const totalTickets = sLogs.reduce((sum, s) => sum + parseInt(s.qty||0), 0);
+        const totalComplimentaries = sLogs.reduce((sum, s) => sum + parseInt(s.complimentaries||0), 0);
+
+        // Desglose por tipo de Ticket/Venta
+        let typesBreakdown = '';
+        const typesMap = {};
+        sLogs.forEach(s => {
+            const tName = s.type;
+            if(!typesMap[tName]) typesMap[tName] = 0;
+            typesMap[tName] += parseInt(s.qty||0);
+        });
+        
+        for (const [tName, qty] of Object.entries(typesMap)) {
+            typesBreakdown += `<span class="inline-block bg-[#ff5100]/10 text-[#ff5100] text-[10px] font-black px-2 py-1 rounded border border-[#ff5100]/20 mr-2 mb-1 shadow-sm">${tName}: ${qty}</span>`;
+        }
+
+        html += `
+            <tr class="hover:bg-[#1a1a1a] transition-colors border-b border-[#222]">
+                <td class="py-5 px-6 text-white font-bold text-sm border-r border-[#222]">
+                    <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-green-500"></div> ${c.name}</div>
+                    <div class="text-[10px] text-[#888] font-mono mt-1 w-full flex items-center">ID: ${c.id}</div>
+                </td>
+                <td class="py-5 px-6 border-r border-[#222]">
+                    <div class="text-[10px] uppercase text-[#a3a3a3] tracking-wider mb-1">Leads Logrados</div>
+                    <div class="text-white font-mono font-black text-xl">${totalLeads} <span class="text-[#ff5100] text-sm"><i data-lucide="users" class="w-4 h-4 inline"></i></span></div>
+                    
+                    <div class="text-[10px] uppercase text-[#a3a3a3] tracking-wider mt-3 mb-1">Costo Acum.</div>
+                    <div class="text-green-400 font-mono font-bold">$${totalSpend.toFixed(2)}</div>
+                </td>
+                <td class="py-5 px-6 border-r border-[#222]">
+                    <div class="text-[10px] uppercase text-[#a3a3a3] tracking-wider mb-1">Entradas Registradas</div>
+                    <div class="text-white font-mono font-black text-2xl">${totalTickets}</div>
+                    
+                    <div class="text-[10px] uppercase text-[#a3a3a3] tracking-wider mt-3 mb-1">Cortesías / Manuales</div>
+                    <div class="text-[#888] font-mono font-bold">${totalComplimentaries}</div>
+                </td>
+                <td class="py-5 px-6">
+                    <div class="text-[10px] uppercase text-[#a3a3a3] tracking-wider mb-2">Desglose de Tipos (Métricas)</div>
+                    ${typesBreakdown || '<span class="text-[#333] text-xs font-bold italic border border-[#333] px-2 py-1 rounded">Ninguna venta cargada</span>'}
+                </td>
+            </tr>
+        `;
+    });
+    tbody.innerHTML = html;
+}
 
 function renderStats() {
     const camp = data.campaigns.find(c => String(c.id) === String(activeCampaignId));

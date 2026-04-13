@@ -1,16 +1,21 @@
-<div class="pegdash-wrapper pb-24">
-    <?php include PEGDASH_PLUGIN_DIR . '/views/partials/nav.php'; ?>
+<div class="pegdash-wrapper h-screen bg-[#000000] flex overflow-hidden font-sans">
     
-    <main class="max-w-7xl mx-auto p-4 md:p-8 space-y-8">
-        <?php include PEGDASH_PLUGIN_DIR . '/views/partials/stats.php'; ?>
-        <?php include PEGDASH_PLUGIN_DIR . '/views/partials/entry.php'; ?>
-        <?php include PEGDASH_PLUGIN_DIR . '/views/partials/structure.php'; ?>
-        <?php include PEGDASH_PLUGIN_DIR . '/views/partials/config.php'; ?>
-    </main>
+    <!-- LATERAL MENU (DESKTOP) & MOBILE SLIDE-IN -->
+    <?php include PEGDASH_PLUGIN_DIR . '/views/partials/nav.php'; ?>
+
+    <div class="flex-1 flex flex-col h-screen overflow-hidden relative z-0">
+        <!-- TOP HEADER FOR QUICK ACTIONS -->
+        <?php include PEGDASH_PLUGIN_DIR . '/views/partials/header.php'; ?>
+
+        <!-- MAIN FLOW CONTENT -->
+        <main class="flex-1 overflow-y-auto p-4 md:p-8 space-y-8 bg-gradient-to-br from-[#0a0a0a] to-[#000]">
+            <?php include PEGDASH_PLUGIN_DIR . '/views/partials/campaigns_hub.php'; ?>
+            <?php include PEGDASH_PLUGIN_DIR . '/views/partials/stats.php'; ?>
+            <?php include PEGDASH_PLUGIN_DIR . '/views/partials/entry.php'; ?>
+            <?php include PEGDASH_PLUGIN_DIR . '/views/partials/structure.php'; ?>
+            <?php include PEGDASH_PLUGIN_DIR . '/views/partials/config.php'; ?>
+        </main>
+    </div>
     
     <?php include PEGDASH_PLUGIN_DIR . '/views/partials/modals.php'; ?>
-
-    <script>
-        // Plugin enlazado a la Base de Datos SQL de WordPress. Firebase eliminado.
-    </script>
 </div>
