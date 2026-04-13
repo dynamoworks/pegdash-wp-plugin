@@ -27,9 +27,6 @@ class PegDash_Plugin {
         // Enlazar los Hooks de WordPress
         add_action('admin_menu', array($this, 'add_admin_menu'));
         add_action('admin_init', array($this, 'register_settings'));
-        
-        // Forzar construcción de Tablas SQL (Failsafe por si no se desactivó/activó el plugin)
-        add_action('init', array('PegDash_DB', 'create_tables'));
 
         add_action('wp_enqueue_scripts', array($this, 'enqueue_frontend_assets'));
         add_shortcode('pegdash', array($this, 'render_shortcode'));
