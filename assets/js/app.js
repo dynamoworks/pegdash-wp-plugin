@@ -118,9 +118,7 @@ function render() {
     renderHierarchy();
     renderConfig();
     renderCharts();
-    if(window.lucide) window.lucide.createIcons();
-}
-
+function renderSelectors() {
     const campSel = document.getElementById('active-campaign-selector');
     const moSel = document.getElementById('mobile-active-campaign-selector');
     const campHtml = data.campaigns.map(c => `<option class="bg-[#111] text-white" value="${c.id}" ${c.id === activeCampaignId ? 'selected' : ''}>${c.name}</option>`).join('') || '<option value="" class="bg-[#111] text-white">Crea una campaña</option>';
